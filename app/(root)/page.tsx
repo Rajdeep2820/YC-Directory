@@ -12,9 +12,7 @@ export default async function Home({searchParams} : {
 }){
   const query = (await searchParams).query;
   const params = {search : query || null};
-  const {data : posts} = await sanityFetch( { query: STARTUP_QUERY})
-
-  console.log(JSON.stringify(posts, null, 2));
+  const {data : posts} = await sanityFetch( { query: STARTUP_QUERY , params})
 
   // const posts = [{
   //   _createdAt : new Date(),
@@ -36,7 +34,7 @@ export default async function Home({searchParams} : {
 
     <section className="section_container">
       <p className="text-30-semibold">
-        {query ? `Searching for ${query}` : "All Startups"}
+        {query ? `Searching for "${query}"` : "All Startups"}
         
       </p>
 
