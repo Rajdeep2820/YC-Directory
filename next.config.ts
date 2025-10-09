@@ -8,10 +8,11 @@ const nextConfig: NextConfig = {
         protocol : 'https',
         hostname : '*'
       }
-    ]
+    ],
   },
   experimental : {
-    ppr : 'incremental'
+    ppr : "incremental",
+    after : true,
   },
   devIndicators : {
     appIsrStatus : true,
