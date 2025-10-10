@@ -8,9 +8,10 @@ import { after } from 'next/server'
 const View = async ({id} : {id : string}) => {
     const {views : totalViews} = await client.withConfig({useCdn : false}).fetch(STARTUP_VIEWS_QUERY, {id});
 
-    after( async () => {await writeClient 
+    after( 
+     async () => {await writeClient 
     .patch(id)
-    .set({totalViews : totalViews + 1})
+    .set({views : totalViews + 1})
     .commit()}
 );
     
