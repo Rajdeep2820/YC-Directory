@@ -8,6 +8,7 @@ import { after } from 'next/server'
 const View = async ({id} : {id : string}) => {
     const {views : totalViews} = await client.withConfig({useCdn : false}).fetch(STARTUP_VIEWS_QUERY, {id});
 
+// Update no. of view whenever sees this post.
     after( 
      async () => {await writeClient 
     .patch(id)
@@ -15,7 +16,7 @@ const View = async ({id} : {id : string}) => {
     .commit()}
 );
     
-// TODO : Update no. of view whenever sees this post.
+
     return ( <div className="view-container">
         <div className="absolute -top-2 -right-2">
             <Ping/>

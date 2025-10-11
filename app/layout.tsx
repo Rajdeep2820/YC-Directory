@@ -3,6 +3,7 @@ import { Work_Sans } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
 import 'easymde/dist/easymde.min.css';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 const workSans = localFont({
   src : [
     {
@@ -70,6 +71,8 @@ export default function RootLayout({
         className={workSans.variable}
       >
         {children}
+        <Alert/>
+        <AlertTitle/>
       </body>
     </html>
   );

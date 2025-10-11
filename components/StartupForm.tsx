@@ -7,10 +7,21 @@ import { Button } from "./ui/button";
 import { Send } from "lucide-react";
 import { formSchema } from "@/lib/validation";
 import {z} from 'zod';
+import { useToast } from "@/hooks/use-toast";
+import { AlertCircleIcon, CheckCircle2Icon, PopcornIcon } from "lucide-react";
+import {
+    Alert,
+    AlertDescription,
+    AlertTitle,
+  } from "@/components/ui/alert"
+import { useRouter } from "next/navigation";
 
 const StartupForm = () => {
     const [errors , setErrors] = useState<Record<string,string>>({});
     const [pitch , setPitch] = useState("");
+
+    const {toast} = useToast();
+    const router = useRouter();
     const handleFormSubmit = async (prevState : any , formData : FormData) => {
         try{
             const formValues = {
@@ -22,18 +33,49 @@ const StartupForm = () => {
                 
             }
             await formSchema.parseAsync(formValues);
+            console.log(formValues);
+            // // const result = await createIdea(prevState , formData , pitch);
+            // // console.log(result);
 
-            // const result = await createIdea(prevState , formData , pitch);
-            // console.log(result);
+            // if(result.status === 'SUCCESS'){
+            //     // toast({
+            //     //     title : "Success",
+            //     //     description : "Your startup pitch has been created successfully.",
+            //     //     variant : "destructive",
+
+            //     // });
+            //     router.push(`/startup/${result.id}`);
+            // } 
         }
         catch (error) {
             if(error instanceof z.ZodError){
                 const fieldErrors = error.flatten().fieldErrors;
                 setErrors(fieldErrors as unknown as Record<string , string>);
+                // toast({
+                //     title : "Error",
+                //     description : "Please check your input and try again.",
+                //     variant : "destructive",
+
+                // });
+                <Alert variant="destructive">
+                <AlertCircleIcon />
+                <AlertTitle>Please check your input and try again.</AlertTitle>
+                </Alert>
 
                 return {...prevState, error : "Validation Failed" , status : "ERROR"};
             }
+            <Alert variant="destructive">
+            <AlertCircleIcon />
+            <AlertTitle>An unexpected error occured.</AlertTitle>
+            </Alert>
+              // toast({
+                //     title : "Error",
+                //     description : "Please check your input and try again.",
+                //     variant : "destructive",
+
+                // });
             return {...prevState , error : "An unexpected error has occured." , STATUS : 'ERROR'};
+            
         }
 
     };
@@ -58,7 +100,7 @@ const StartupForm = () => {
                 placeholder="Startup Title
                 "/>
 
-                {errors.title && <p className = "startup-form_error">errors.title</p>}
+                {errors.title && <p className = "startup-form_error">{errors.title}</p>}
             </div>
 
             <div>
@@ -73,12 +115,12 @@ const StartupForm = () => {
                 placeholder="Startup Description
                 "/>
 
-                {errors.description && <p className = "startup-form_error">errors.description</p>}
+                {errors.description && <p className = "startup-form_error">{errors.description}</p>}
             </div>
 
             <div>
                 <label htmlFor="category" className="startup-form_label">
-                    Title
+                    Category
                 </label>
                 <Input 
                 id = "category"
@@ -88,7 +130,7 @@ const StartupForm = () => {
                 placeholder="Startup Category (Tech, Healthcare, Education...)
                 "/>
 
-                {errors.category && <p className = "startup-form_error">errors.category</p>}
+                {errors.category && <p className = "startup-form_error">{errors.category}</p>}
             </div>
 
             <div>
@@ -103,7 +145,7 @@ const StartupForm = () => {
                 placeholder="Startup Image URL
                 "/>
 
-                {errors.link && <p className = "startup-form_error">errors.link</p>}
+                {errors.link && <p className = "startup-form_error">{errors.link}</p>}
             </div>
 
             <div data-color-mode="light">
@@ -127,7 +169,7 @@ const StartupForm = () => {
                }
                />
 
-                {errors.pitch && <p className = "startup-form_error">errors.pitch</p>}
+                {errors.pitch && <p className = "startup-form_error">{errors.pitch}</p>}
             </div>
             <Button type="submit" className="startup-form_btn text-white" disabled={isPending}>
                {isPending ? 'Submitting...' : 'Submit Your Pitch'}
