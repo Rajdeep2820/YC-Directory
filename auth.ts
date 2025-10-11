@@ -8,7 +8,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [Google],
   callbacks : {
 
-    async signIn({ user, profile }) {
+    async signIn({ user , profile }) {
       const googleId = profile.sub; // ✅ correct Google unique ID
     
       const existingUser = await client.withConfig({useCdn : false}).fetch(
