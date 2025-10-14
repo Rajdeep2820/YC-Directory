@@ -32,7 +32,7 @@ const Navbar = async () => {
                             <Link href={`/user/${session?.id}`}>
                                 <div className="flex items-center gap-3">
                                 <span ><b>{session?.user?.name}</b></span>
-                                <Image src="https://lh3.googleusercontent.com/a/ACg8ocLislkjXRWlvRibYx-1OP0KbGEFphTfWVyh_93OHubWN-hVzw=s96-c" alt="logo" width={40} height={40}></Image>
+                                <Image src={session?.user?.image} alt="logo" width={40} height={40}></Image>
                                 </div>
                             </Link>
                         </>
@@ -40,7 +40,7 @@ const Navbar = async () => {
                         <form action={async () => {
                             "use server";
 
-                            await signIn('google');
+                            await signIn('google','github');
 
                         }}>
                             <button type="submit">

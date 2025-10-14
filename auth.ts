@@ -19,7 +19,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (!existingUser) {
         await writeClient.create({
           _type: "author",
-          id: googleId,
+          _id: googleId,
+          id : googleId,
           name: user.name,
           username: user.email.split('@')[0], // Google has no login field
           email: user.email,

@@ -44,7 +44,7 @@ if (!existingAuthor.length) {
             },
             author : {
                 _type : 'reference',
-                _rev : session.id,
+                _ref : session?.id,
             },
             pitch
         };
