@@ -8,7 +8,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [Google],
   callbacks : {
 
-    async signIn({ user , profile }) {
+    async signIn({ user , profile}) {
       const googleId = profile.sub; // ✅ correct Google unique ID
     
       const existingUser = await client.withConfig({useCdn : false}).fetch(
@@ -47,19 +47,22 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (user) {
           token.id = user?.id; // ✅ assign user._id to token
         }
+        //console.log(token?.id);
+        //console.log(user?.id)
       }
       return token;
     },
     
-    // async session({session , token}){
-    //   Object.assign(session , {id : token.id});
-    //   return session;
-    // },
-    async session({ session, token }) {
-      // Copy the id from JWT to session
-      session.id = token.id;
+    async session({session , token}){
+      Object.assign(session , {id : token.id});
       return session;
-    }, 
+    },
+
+    // async session({ session, token }) {
+    //   // Copy the id from JWT to session
+    //   session.id = token.id;
+    //   return session;
+    // }, 
   },
 })
 
