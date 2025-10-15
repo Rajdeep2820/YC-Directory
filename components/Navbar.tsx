@@ -4,6 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { auth, signOut, signIn } from '@/auth'
 import { getProviders } from 'next-auth/react';
+
 const Navbar = async () => {
     const session = await auth();
     return (
@@ -40,8 +41,11 @@ const Navbar = async () => {
                         <form action={async () => {
                             "use server";
 
-                            await signIn('google','github');
-
+                            await(
+                                signIn("GitHub"),
+                                signIn("Google")
+                            )
+                            
                         }}>
                             <button type="submit">
                                 Login
