@@ -46,3 +46,4 @@ export const STARTUP_VIEWS_QUERY = defineQuery(`
     bio,
     }
     `)
+  

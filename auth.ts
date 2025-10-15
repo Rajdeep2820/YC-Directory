@@ -1,72 +1,80 @@
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
+import GitHub from "next-auth/providers/github";
 import { client } from "./sanity/lib/client";
-import { AUTHOR_GOOGLE_ID_QUERY } from "./sanity/lib/queries";
+import { AUTHOR_GOOGLE_ID_QUERY} from "./sanity/lib/queries";
 import { writeClient } from "./sanity/lib/write-client";
- 
-export const { handlers, auth, signIn, signOut } = NextAuth({
-  providers: [Google],
-  callbacks : {
 
-    async signIn({ user , profile}) {
-      const googleId = profile.sub; // ✅ correct Google unique ID
-    
-      const existingUser = await client.withConfig({useCdn : false}).fetch(
-        AUTHOR_GOOGLE_ID_QUERY,
-        { id: googleId }  // pass correct ID
-      );
-    
-      if (!existingUser) {
-        await writeClient.create({
-          _type: "author",
-          _id: googleId,
-          id : googleId,
-          name: user.name,
-          username: user.email.split('@')[0], // Google has no login field
-          email: user.email,
-          image: user.image,
-          bio: "", // optional
-        });
+export const { handlers, auth, signIn, signOut } = NextAuth({
+  providers: [GitHub , Google],
+
+  callbacks: {
+    async signIn({ user, account, profile }) {
+      if (account?.provider === "google") {
+        const googleId = profile.sub.toString();
+        const existingUser = await client.withConfig({ useCdn: false }).fetch(
+          AUTHOR_GOOGLE_ID_QUERY,
+          { id: googleId }
+        );
+
+        if (!existingUser) {
+          await writeClient.create({
+            _type: "author",
+            _id: googleId,
+            id: googleId,
+            name: user.name,
+            username: user.email.split("@")[0],
+            email: user.email,
+            image: user.image,
+            bio: "",
+          });
+        }
       }
-    
+
+      if (account?.provider === "github") {
+        const gitId = profile.id.toString();
+        const existingUser = await client.withConfig({ useCdn: false }).fetch(
+          AUTHOR_GOOGLE_ID_QUERY,
+          { id: gitId }
+        );
+
+        if (!existingUser) {
+          await writeClient.create({
+            _type: "author",
+            _id: gitId,
+            id: gitId,
+            name: user.name,
+            username: profile.login,
+            email: user.email,
+            image: user.image,
+            bio: profile.bio || "",
+          });
+        }
+      }
+
       return true;
     },
-    
-    // async jwt({token , account , profile}){
-    //   if(account && profile){
-    //     const user = await client.withConfig({useCdn : false}).fetch(AUTHOR_GOOGLE_ID_QUERY , {id : profile.sub});
-    //     if(!user){
-    //       token.id = user?._id;
-    //     }
-    //   }
-    //   return token;
-    // },
+
     async jwt({ token, account, profile }) {
-      // Only run on login
-      if (account && profile) {
-        const user = await client.withConfig({useCdn : false}).fetch(AUTHOR_GOOGLE_ID_QUERY, { id: profile.sub });
-        if (user) {
-          token.id = user?.id; // ✅ assign user._id to token
-        }
-        //console.log(token?.id);
-        //console.log(user?.id)
+      if (account?.provider === "google") {
+        const user = await client.withConfig({ useCdn: false }).fetch(AUTHOR_GOOGLE_ID_QUERY, { id: profile.sub });
+        if (!user) token.id = user?.id;
+      }
+
+      if (account?.provider === "github") {
+        const user = await client.withConfig({ useCdn: false }).fetch(AUTHOR_GOOGLE_ID_QUERY, { id: profile.id });
+        if (!user) token.id = user?.id;
       }
       return token;
     },
-    
-    async session({session , token}){
-      Object.assign(session , {id : token.id});
+
+    async session({ token , session}) {
+      session.id = token.id;
+      session.provider = token.provider;
       return session;
     },
-
-    // async session({ session, token }) {
-    //   // Copy the id from JWT to session
-    //   session.id = token.id;
-    //   return session;
-    // }, 
   },
-})
-
+});
 
 /* | Key            | Description                                                                       |
 | -------------- | --------------------------------------------------------------------------------- |
