@@ -55,8 +55,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return true;
     },
 
-    async jwt({ token, account, profile }) {
-      if (account?.provider === "google") {
+    async JWT({ token, account, profile }) {
+      if (account.provider === "google") {
         const user = await client.withConfig({ useCdn: false }).fetch(AUTHOR_GOOGLE_ID_QUERY, { id: profile.sub });
         if (!user) token.id = user?.id;
       }
