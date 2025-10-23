@@ -26,12 +26,12 @@ export const createPitch = async (
 
     const slug = slugify(title as string, {lower : true , strict : true});
 
-    try{
-        const existingAuthor = await client.fetch(`*[_type=="author" && _id==$id]{_id}`, { id: session.id });
-if (!existingAuthor.length) {
-    console.log("Author doesn't exist!");
-    return parseServerActionResponse({ error: "Author missing", status: "ERROR" });
-}
+ try{
+//         const existingAuthor = await client.withConfig({ useCdn: false }).fetch(`*[_type=="author" && _id==$id]{_id}`, { id: session.id });
+// if (!existingAuthor.length) {
+//     console.log("Author doesn't exist!");
+//     return parseServerActionResponse({ error: "Author missing", status: "ERROR" });
+// }
 
         const startup = {
             title,
@@ -44,7 +44,7 @@ if (!existingAuthor.length) {
             },
             author : {
                 _type : 'reference',
-                _ref : session.id,
+                _ref : String(session.id),
             },
             pitch
         };

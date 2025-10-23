@@ -35,7 +35,7 @@ export const STARTUP_VIEWS_QUERY = defineQuery(`
   }
   `);
 
-  export const AUTHOR_GOOGLE_ID_QUERY = defineQuery(`
+export const AUTHOR_GOOGLE_ID_QUERY = defineQuery(`
     *[_type == "author" && _id == $id][0]{
     _id,
     id,
