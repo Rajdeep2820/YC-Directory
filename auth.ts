@@ -55,15 +55,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return true;
     },
 
-    async JWT({ token, account, profile }) {
-      if (account.provider === "google") {
+    async jwt({ token, account, profile }) {
+      if (account?.provider === "google") {
         const user = await client.withConfig({ useCdn: false }).fetch(AUTHOR_GOOGLE_ID_QUERY, { id: profile.sub });
-        if (!user) token.id = user?.id;
+        token.id = user?.id || profile.sub;
+        token.provider = "google";
       }
 
       if (account?.provider === "github") {
         const user = await client.withConfig({ useCdn: false }).fetch(AUTHOR_GOOGLE_ID_QUERY, { id: profile.id });
-        if (!user) token.id = user?.id;
+        token.id = user?.id || profile.id;
+        token.provider = "github";
       }
       return token;
     },
