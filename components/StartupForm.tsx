@@ -8,17 +8,17 @@ import { Send } from "lucide-react";
 import { formSchema } from "@/lib/validation";
 import {z} from 'zod';
 import { useToast } from "@/hooks/use-toast";
-// import { AlertCircleIcon, CheckCircle2Icon, PopcornIcon } from "lucide-react";
-// import {
-//     Alert,
-//     AlertDescription,
-//     AlertTitle,
-//   } from "@/components/ui/alert"
+import { AlertCircleIcon, CheckCircle2Icon} from "lucide-react";
+import {
+    Alert,
+    AlertTitle,
+  } from "@/components/ui/alert"
 import { useRouter } from "next/navigation";
 import { createPitch } from "@/lib/action";
 
 const StartupForm = () => {
     const [errors , setErrors] = useState<Record<string,string>>({});
+    const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const [pitch , setPitch] = useState("");
 
     const {toast} = useToast();
@@ -37,40 +37,50 @@ const StartupForm = () => {
 
             const result = await createPitch(prevState , formData , pitch);
             if(result.status === 'SUCCESS'){
-                toast({
-                    title : "Success",
-                    description : "Your startup pitch has been created successfully.",
-                });
-                router.push(`/startup/${result._id}`);
+                // toast({
+                //     title : "Success",
+                //     description : "Your startup pitch has been created successfully.",
+                // });
+                {successMessage && (
+                    <Alert className="mb-4">
+                        <CheckCircle2Icon />
+                        <AlertTitle>{successMessage}</AlertTitle>
+                    </Alert>
+                )}    
+                router.push(`/startup/${result._id}`);            
             } 
         }
         catch (error) {
             if(error instanceof z.ZodError){
                 const fieldErrors = error.flatten().fieldErrors;
                 setErrors(fieldErrors as unknown as Record<string , string>);
-                toast({
-                    title : "Error",
-                    description : "Please check your input and try again.",
-                    variant : "destructive",
+                // toast({
+                //     title : "Error",
+                //     description : "Please check your input and try again.",
+                //     variant : "destructive",
 
-                });
-                // <Alert variant="destructive">
-                // <AlertCircleIcon />
-                // <AlertTitle>Please check your input and try again.</AlertTitle>
-                // </Alert>
+                // });
+                {errors && (
+                    <Alert variant="destructive" className="mb-4">
+                        <AlertCircleIcon />
+                        <AlertTitle>Some Zod Error.</AlertTitle>
+                    </Alert>
+                )}
 
                 return {...prevState, error : "Validation Failed" , status : "ERROR"};
             }
-            // <Alert variant="destructive">
-            // <AlertCircleIcon />
-            // <AlertTitle>An unexpected error occured.</AlertTitle>
-            // </Alert>
-              toast({
-                    title : "Error",
-                    description : "Please check your input and try again.",
-                    variant : "destructive",
+            {error && (
+                <Alert variant="destructive" className="mb-4">
+                    <AlertCircleIcon />
+                    <AlertTitle>Some Zod Error.</AlertTitle>
+                </Alert>
+            )}
+            //   toast({
+            //         title : "Error",
+            //         description : "Please check your input and try again.",
+            //         variant : "destructive",
 
-                });
+            //     });
             return {...prevState , error : "An unexpected error has occured." , STATUS : 'ERROR'};
             
         }
