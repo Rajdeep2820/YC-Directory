@@ -1,21 +1,28 @@
-import React from "react";
+"use client";
+
+import React, { useEffect, useRef, useState } from "react";
 import Ping from "./Ping";
-import { STARTUP_VIEWS_QUERY } from "@/sanity/lib/queries";
-import { client } from "@/sanity/lib/client";
-import { writeClient } from "@/sanity/lib/write-client";
-import { after } from 'next/server'
 
-const View = async ({id} : {id : string}) => {
-    const {views : totalViews} = await client.withConfig({useCdn : false}).fetch(STARTUP_VIEWS_QUERY, {id});
+const View = ({ id, initialViews }: { id: string; initialViews: number }) => {
+    const [views, setViews] = useState(initialViews);
+    const viewId = useRef<string>(crypto.randomUUID());
 
-// Update no. of view whenever sees this post.
-    after( 
-     async () => {await writeClient 
-    .patch(id)
-    .set({views : totalViews + 1})
-    .commit()}
-);
-    
+    useEffect(() => {
+        const incrementViews = async () => {
+            const response = await fetch(`/api/startups/${encodeURIComponent(id)}/view`, {
+                method: "POST",
+                cache: "no-store",
+                headers: { "X-View-Id": viewId.current },
+            });
+
+            if (!response.ok) return;
+
+            const { views } = await response.json();
+            setViews(views);
+        };
+
+        void incrementViews();
+    }, [id]);
 
     return ( <div className="view-container">
         <div className="absolute -top-2 -right-2">
@@ -23,8 +30,8 @@ const View = async ({id} : {id : string}) => {
         </div>
 
         <p className="view-text">
-                       {totalViews == 1 ? <span className="font-black">{totalViews} View</span>
-            :  <span className="font-black">{totalViews} Views</span>}
+                       {views === 1 ? <span className="font-black">{views} View</span>
+            :  <span className="font-black">{views} Views</span>}
         </p>
     </div>
     );
