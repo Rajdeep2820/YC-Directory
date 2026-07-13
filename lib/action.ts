@@ -4,9 +4,15 @@ import { auth } from "@/auth";
 import { parseServerActionResponse } from "./utils";
 import slugify from "slugify";
 import { writeClient } from "@/sanity/lib/write-client";
-import { client } from "@/sanity/lib/client";
+
+export type PitchFormState = {
+    error: string;
+    status: "INITIAL" | "SUCCESS" | "ERROR";
+    _id?: string;
+};
+
 export const createPitch = async (
-    state : any ,
+    _state: PitchFormState,
     form : FormData,
     pitch : string,
 
@@ -46,6 +52,7 @@ export const createPitch = async (
                 _type : 'reference',
                 _ref : String(session.id),
             },
+            views: 0,
             pitch
         };
         const result = await writeClient.create({_type : "startup", ...startup})

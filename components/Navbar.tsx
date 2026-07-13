@@ -3,7 +3,6 @@ import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { auth, signOut, signIn } from '@/auth'
-import { getProviders } from 'next-auth/react';
 
 const Navbar = async () => {
     const session = await auth();
@@ -33,7 +32,7 @@ const Navbar = async () => {
                             <Link href={`/user/${session?.id}`}>
                                 <div className="flex items-center gap-3">
                                 <span ><b>{session?.user?.name}</b></span>
-                                <Image src={session?.user?.image} alt="logo" width={40} height={40}></Image>
+                                <Image src={session.user.image || "https://placehold.co/40x40"} alt="Profile avatar" width={40} height={40}></Image>
                                 </div>
                             </Link>
                         </>
