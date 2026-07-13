@@ -33,7 +33,7 @@
     "install": "^0.13.0",
     "lucide-react": "^0.544.0",
     "markdown-it": "^14.1.0",
-    "next": "^15.5.4",
+    "next": "15.5.20",
     "next-auth": "^5.0.0-beta.29",
     "next-sanity": "^10.0.17-canary.1",
     "next-themes": "^0.4.6",
