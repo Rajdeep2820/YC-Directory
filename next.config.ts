@@ -3,16 +3,22 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
-    dangerouslyAllowSVG : true,
-    remotePatterns : [
+    // Startup images are user-submitted URLs that can point to any host
+    // (Unsplash, Imgur, custom domains, etc.) — we cannot enumerate them all.
+    // The original security risk was dangerouslyAllowSVG:true (XSS via SVG),
+    // NOT the wildcard hostname. We keep dangerouslyAllowSVG off (the default)
+    // which eliminates that risk, while allowing any HTTPS image source.
+    remotePatterns: [
       {
-        protocol : 'https',
-        hostname : '*'
-      }
+        protocol: "https",
+        hostname: "**", // any HTTPS host; SVG is still blocked by default
+      },
     ],
   },
-  // experimental : {
-  //   ppr : "incremental",
+  // PPR (ppr: "incremental") requires the Next.js canary channel.
+  // Uncomment the block below only after upgrading to canary:
+  // experimental: {
+  //   ppr: "incremental",
   // },
   // devIndicators : {
   //   appIsrStatus : true,
