@@ -2,8 +2,7 @@
 import React from "react";
 import { Suspense } from "react";
 import { formatDate } from "@/lib/utils";
-import { client } from "@/sanity/lib/client";
-import { STARTUP_BY_ID_QUERY } from "@/sanity/lib/queries";
+import { getStartupById } from "@/lib/startups";
 import Link from "next/link";
 import Image from "next/image";
 import markdownit from 'markdown-it';
@@ -12,10 +11,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import View from "@/components/View";
 
 const md = markdownit();
-export const experimental_ppr = true;
+export const revalidate = 300;
 const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
    const id = (await params).id;
-   const post = await client.fetch(STARTUP_BY_ID_QUERY, { id });
+   const post = await getStartupById(id);
    if (!post) return notFound();
 
    const parsedContent = md.render(post?.pitch || " ");
@@ -29,15 +28,17 @@ const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
 
          <section className="section_container">
             <div className="w-xl items-center">
-               <img
-                  src={post.image}
-                  alt="thumbnail"
-                  className="w-[800px] h-[450px] mx-auto rounded-xl" />
+               <Image
+                  src={post.image || "https://placehold.co/800x450"}
+                  alt={`${post.title || "Startup"} thumbnail`}
+                  width={800}
+                  height={450}
+                  className="w-[800px] h-[450px] mx-auto rounded-xl object-cover" />
             </div>
 
             <div className="space-y-5 mt-10 max-w-4xl mx-auto">
                <div className="flex-between gap-5">
-                  <Link href={`user/${post.author?._id}`} className="flex gap-2 items-center mb-3">
+                  <Link href={`/user/${post.author?._id}`} className="flex gap-2 items-center mb-3">
                      <Image src={post.author.image} alt="avatar" width={64} height={64} className="rounded-full drop-shadow-lg" />
 
                      <div>
@@ -60,7 +61,7 @@ const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
             {/*TODO : Editor selected startups... */}
 
             <Suspense fallback={<Skeleton className="view_skeleton"/>}>
-            <View id={id}/>
+            <View id={id} initialViews={post.views ?? 0}/>
             </Suspense>
 
          </section>
