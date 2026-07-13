@@ -11,7 +11,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   callbacks: {
     async signIn({ user, account, profile }) {
       if (account?.provider === "google") {
-        const googleId = profile.sub.toString();
+        const googleId = profile?.sub;
+        if (!googleId) return false;
+
         const existingUser = await client.withConfig({ useCdn: false }).fetch(
           AUTHOR_GOOGLE_ID_QUERY,
           { id: googleId }
@@ -23,7 +25,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             _id: googleId,
             id: googleId,
             name: user.name,
-            username: user.email.split("@")[0],
+            username: user.email?.split("@")[0] || user.name || googleId,
             email: user.email,
             image: user.image,
             bio: "",
@@ -32,7 +34,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
 
       if (account?.provider === "github") {
-        const gitId = profile.id.toString();
+        const gitId = profile?.id;
+        if (!gitId) return false;
+
         const existingUser = await client.withConfig({ useCdn: false }).fetch(
           AUTHOR_GOOGLE_ID_QUERY,
           { id: gitId }
@@ -44,10 +48,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             _id: gitId,
             id: gitId,
             name: user.name,
-            username: profile.login,
+            username: profile?.login || user.email?.split("@")[0] || user.name || gitId,
             email: user.email,
             image: user.image,
-            bio: profile.bio || "",
+            bio: profile?.bio || "",
           });
         }
       }
@@ -56,17 +60,28 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
 
     async jwt({ token, account, profile }) {
+      // Fast path: token.id is already populated from a previous run (session
+      // refresh, page navigation, etc.). Skip ALL network calls.
+      if (token.id) return token;
+
+      // First sign-in only — derive the ID directly from the OAuth profile.
+      // signIn() already confirmed the user exists in Sanity (or just created
+      // them), so there is no need for a second Sanity round-trip here.
+      // profile.sub (Google) / profile.id (GitHub) == the Sanity document _id.
       if (account?.provider === "google") {
-        const user = await client.withConfig({ useCdn: false }).fetch(AUTHOR_GOOGLE_ID_QUERY, { id: profile.sub });
-        token.id = user?.id || profile.sub;
+        const googleId = profile?.sub;
+        if (!googleId) return token;
+        token.id = googleId;
         token.provider = "google";
       }
 
       if (account?.provider === "github") {
-        const user = await client.withConfig({ useCdn: false }).fetch(AUTHOR_GOOGLE_ID_QUERY, { id: profile.id });
-        token.id = user?.id || profile.id;
+        const gitId = profile?.id;
+        if (!gitId) return token;
+        token.id = String(gitId);
         token.provider = "github";
       }
+
       return token;
     },
 
