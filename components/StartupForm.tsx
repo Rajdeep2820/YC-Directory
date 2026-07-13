@@ -1,4 +1,5 @@
 'use client'
+import 'easymde/dist/easymde.min.css';
 import React, { useActionState, useState } from "react";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
@@ -7,23 +8,20 @@ import { Button } from "./ui/button";
 import { Send } from "lucide-react";
 import { formSchema } from "@/lib/validation";
 import {z} from 'zod';
-import { useToast } from "@/hooks/use-toast";
-import { AlertCircleIcon, CheckCircle2Icon} from "lucide-react";
+import { AlertCircleIcon } from "lucide-react";
 import {
     Alert,
     AlertTitle,
   } from "@/components/ui/alert"
 import { useRouter } from "next/navigation";
-import { createPitch } from "@/lib/action";
+import { createPitch, type PitchFormState } from "@/lib/action";
 
 const StartupForm = () => {
     const [errors , setErrors] = useState<Record<string,string>>({});
-    const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const [pitch , setPitch] = useState("");
 
-    const {toast} = useToast();
     const router = useRouter();
-    const handleFormSubmit = async (prevState : any , formData : FormData) => {
+    const handleFormSubmit = async (prevState: PitchFormState, formData: FormData): Promise<PitchFormState> => {
         try{
             const formValues = {
                 title : formData.get("title") as string,
@@ -37,51 +35,18 @@ const StartupForm = () => {
 
             const result = await createPitch(prevState , formData , pitch);
             if(result.status === 'SUCCESS'){
-                // toast({
-                //     title : "Success",
-                //     description : "Your startup pitch has been created successfully.",
-                // });
-                {successMessage && (
-                    <Alert className="mb-4">
-                        <CheckCircle2Icon />
-                        <AlertTitle>{successMessage}</AlertTitle>
-                    </Alert>
-                )}    
                 router.push(`/startup/${result._id}`);            
-            } 
+            }
+
+            return result;
         }
         catch (error) {
             if(error instanceof z.ZodError){
                 const fieldErrors = error.flatten().fieldErrors;
                 setErrors(fieldErrors as unknown as Record<string , string>);
-                // toast({
-                //     title : "Error",
-                //     description : "Please check your input and try again.",
-                //     variant : "destructive",
-
-                // });
-                {errors && (
-                    <Alert variant="destructive" className="mb-4">
-                        <AlertCircleIcon />
-                        <AlertTitle>Some Zod Error.</AlertTitle>
-                    </Alert>
-                )}
-
                 return {...prevState, error : "Validation Failed" , status : "ERROR"};
             }
-            {error && (
-                <Alert variant="destructive" className="mb-4">
-                    <AlertCircleIcon />
-                    <AlertTitle>Some Zod Error.</AlertTitle>
-                </Alert>
-            )}
-            //   toast({
-            //         title : "Error",
-            //         description : "Please check your input and try again.",
-            //         variant : "destructive",
-
-            //     });
-            return {...prevState , error : "An unexpected error has occured." , STATUS : 'ERROR'};
+            return {...prevState , error : "An unexpected error has occurred." , status : 'ERROR'};
             
         }
 
@@ -89,12 +54,18 @@ const StartupForm = () => {
 
     const [state , formAction , isPending] = useActionState(handleFormSubmit , {
         error : "",
-        STATUS : "INITIAL"
+        status : "INITIAL"
     });
 
 
     return(
         <form action={formAction} className="startup-form">
+            {state.status === "ERROR" && (
+                <Alert variant="destructive">
+                    <AlertCircleIcon />
+                    <AlertTitle>{state.error}</AlertTitle>
+                </Alert>
+            )}
             <div>
                 <label htmlFor="title" className="startup-form_label">
                     Title

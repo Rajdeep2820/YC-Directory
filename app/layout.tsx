@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
-import { Work_Sans } from "next/font/google";
 import localFont from "next/font/local";
+import SentryFeedbackPositioner from "@/components/SentryFeedbackPositioner";
 import "./globals.css";
-import 'easymde/dist/easymde.min.css';
 const workSans = localFont({
   src : [
     {
@@ -69,6 +68,7 @@ export default function RootLayout({
       <body
         className={workSans.variable}
       >
+        <SentryFeedbackPositioner />
         {children}
       </body>
     </html>
