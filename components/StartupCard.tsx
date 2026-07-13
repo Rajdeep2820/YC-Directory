@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import { formatDate } from "@/lib/utils";
 import { EyeIcon } from "lucide-react";
@@ -32,13 +34,19 @@ const StartupCard = ({ post }: { post: StartupTypeCard }) => {
                     </Link>
                 </div>
                 <Link href={`/user/${author?._id}`}>
-                    <Image src="https://placehold.co/48x48" alt="placeholder" width={48} height={48} className="rounded-full" />
+                    <Image src={author?.image || "https://placehold.co/48x48"} alt={author?.name || "Author avatar"} width={48} height={48} className="rounded-full" />
                 </Link>
             </div>
 
             <Link href={`/startup/${_id}`}>
                 <p className="startup-card_desc">{description}</p>
-                <img src={image} alt='placeholder' className="startup-card_img" />
+                <Image
+                    src={image || "https://placehold.co/600x400"}
+                    alt={`${title || "Startup"} thumbnail`}
+                    width={600}
+                    height={400}
+                    className="startup-card_img"
+                />
             </Link>
 
             <div className="flex-between gap-3 mt-5">
